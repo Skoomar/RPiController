@@ -12,33 +12,40 @@ import android.view.SurfaceView;
 import android.view.View;
 
 public class JoystickView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
+    private static final int ANY_DIRECTION = 0;
+    private static final int UP_DOWN = 1;
+    private static final int LEFT_RIGHT = 2;
     private float centreX, centreY;
-    private float baseRadius, hatRadius;
+    private float baseRadius, hatRadius; //baseRatio;
     private boolean joystickHeld;
     private JoystickListener joystickCallBack;
-    private float hypotenuse, sin, cos;
+    //private float displacement, constrainedX, constrainedY;
     private final int ratio = 5; // make this smaller for more shading
+    private int direction = 0; // 0 - no constraint, 1 - up/down only, 2 - left/right only
 
 
-    public JoystickView(Context context) {
+    public JoystickView(Context context, int direction) {
         super(context);
         getHolder().addCallback(this);
         setOnTouchListener(this);
+        this.direction = direction;
         if (context instanceof JoystickListener) {
             joystickCallBack = (JoystickListener) context;
         }
     }
 
-    public JoystickView(Context context, AttributeSet attributes) {
+    public JoystickView(Context context, int direction, AttributeSet attributes) {
         super(context, attributes);
         getHolder().addCallback(this);
         setOnTouchListener(this);
+        this.direction = direction;
     }
 
-    public JoystickView(Context context, AttributeSet attributes, int style) {
+    public JoystickView(Context context, int direction, AttributeSet attributes, int style) {
         super(context, attributes, style);
         getHolder().addCallback(this);
         setOnTouchListener(this);
+        this.direction = direction;
     }
 
     private void setupDimensions() {
@@ -141,14 +148,33 @@ public class JoystickView extends SurfaceView implements SurfaceHolder.Callback,
                 float displacement = (float) Math.sqrt((Math.pow(e.getX() - centreX, 2)) + Math.pow(e.getY() - centreY, 2));
                 if (displacement < baseRadius)
                 {
-                    drawJoystick(centreX, e.getY());
-                    //drawJoystick(e.getX(), e.getY()); // constrain to y axis movement
+                    switch(direction) {
+                        case ANY_DIRECTION:
+                            drawJoystick(e.getX(), e.getY());
+                            break;
+                        case UP_DOWN:
+                            drawJoystick(centreX, e.getY());
+                            break;
+                        case LEFT_RIGHT:
+                            drawJoystick(e.getX(), centreY);
+                            break;
+                    }
                     //joystickCallBack.onJoystickMoved((e.getX() - centreX) / baseRadius, (e.getY() - centreY) / baseRadius, getId());
                 } else {
-                    float ratio = baseRadius / displacement;
-                    //float constrainedX = centreX + (e.getX() - centreX) * ratio;
-                    float constrainedY = centreY + (e.getY() - centreY) * ratio;
-                    drawJoystick(centreX, constrainedY);
+                    float baseRatio = baseRadius / displacement;
+                    float constrainedX, constrainedY;
+                    if (direction == UP_DOWN) {
+                        constrainedX = centreX;
+                    } else {
+                        constrainedX = centreX + (e.getX() - centreX) * baseRatio;
+                    }
+
+                    if (direction == LEFT_RIGHT) {
+                        constrainedY = centreY;
+                    } else {
+                        constrainedY = centreY + (e.getY() - centreY) * baseRatio;
+                    }
+                    drawJoystick(constrainedX, constrainedY);
                     //joystickCallBack.onJoystickMoved((constrainedX - centreX) / baseRadius, (constrainedY - centreY) / baseRadius, getId());
                 }
             }

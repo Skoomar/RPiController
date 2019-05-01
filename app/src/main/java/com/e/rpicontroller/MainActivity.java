@@ -10,19 +10,19 @@ public class MainActivity extends AppCompatActivity { //implements JoystickView.
     @Override
     protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
-        JoystickView joystick = new JoystickView(this);
+        JoystickView joystick = new JoystickView(this, 0);
         setContentView(R.layout.activity_main);
     }
 
-    /*
-    @Override
+    /*@Override
     public void onJoystickMoved(float xPercent, float yPercent, int id) {
         switch(id) {
             case R.id.joystickLeft:
                 Log.d("Left Joystick", "X percent: " + xPercent + " Y percent: " + yPercent);
                 break;
-            //case R.id.joystickRight:
-                //Log.d("Right Joystick", "X percent: " + xPercent + " Y percent: " + yPercent);
+            case R.id.joystickRight:
+                Log.d("Right Joystick", "X percent: " + xPercent + " Y percent: " + yPercent);
+                break;
         }
         //Log.d("Main Method", "X percent: " + xPercent + "Y percent: " + yPercent);
     }*/
